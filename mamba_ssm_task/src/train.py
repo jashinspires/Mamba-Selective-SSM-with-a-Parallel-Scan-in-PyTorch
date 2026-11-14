@@ -32,7 +32,7 @@ TASK_CONFIGS = {
         "vocab_size": INDUCTION_VOCAB_SIZE,
         "generator": make_induction,
         "floor": 0.50,
-        "early_stop_acc": 0.85,
+        "early_stop_acc": 0.92,
     },
 }
 
@@ -98,6 +98,20 @@ def build_models_for_task(
     return mamba, transformer, mamba_params, tf_params, mlp_width
 
 
+def _induction_stage(step: int, max_steps: int) -> tuple[int, float]:
+    """Return (sequence_length, lr) 5-stage curriculum for induction."""
+    frac = step / max_steps
+    if frac <= 0.25:
+        return 16, 4e-3
+    if frac <= 0.45:
+        return 32, 3e-3
+    if frac <= 0.65:
+        return 64, 2e-3
+    if frac <= 0.80:
+        return 128, 1.5e-3
+    return 256, 1e-3
+
+
 def train_single_run(
     model_name: str,
     model: torch.nn.Module,
@@ -117,10 +131,13 @@ def train_single_run(
     early_stop_acc = float(task_cfg["early_stop_acc"])
     vocab_size = int(task_cfg["vocab_size"])
 
-    torch.manual_seed(seed)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    eff_batch = 128 if (task == "induction" and device.type == "cuda") else batch_size
+    wd = 0.0 if task == "induction" else 0.01
 
-    # Fixed held-out validation batch drawn fresh from the generator.
+    torch.manual_seed(seed)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=wd)
+
+    # Fixed held-out validation batch at target length 256.
     val_seed = seed + 900000
     val_x, val_y, val_mask = generator(batch=64, length=train_length, seed=val_seed)
     val_x = val_x.to(device)
@@ -132,15 +149,22 @@ def train_single_run(
     best_state_dict = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
     start_time = time.perf_counter()
 
-    micro_bs = 4 if (device.type == "cpu" and batch_size % 4 == 0) else batch_size
-    n_micro = batch_size // micro_bs
+    micro_bs = 4 if (device.type == "cpu" and eff_batch % 4 == 0) else eff_batch
+    n_micro = eff_batch // micro_bs
 
     steps_run = 0
     for step in range(1, max_steps + 1):
         steps_run = step
+        if task == "induction":
+            cur_len, cur_lr = _induction_stage(step, max_steps)
+            for pg in optimizer.param_groups:
+                pg["lr"] = cur_lr
+        else:
+            cur_len = train_length
+
         model.train()
         batch_seed = seed + step
-        x_in, y_tgt, mask = generator(batch=batch_size, length=train_length, seed=batch_seed)
+        x_in, y_tgt, mask = generator(batch=eff_batch, length=cur_len, seed=batch_seed)
         x_in = x_in.to(device)
         y_tgt = y_tgt.to(device)
         mask = mask.to(device)
@@ -170,13 +194,13 @@ def train_single_run(
                 best_step = step
                 best_state_dict = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             print(
-                f"[{task} | {model_name}] step={step:4d} loss={loss_val:.4f} "
-                f"val_acc={val_acc:.4f} best={best_val_acc:.4f} elapsed={time.perf_counter()-start_time:.1f}s",
+                f"[{task} | {model_name} | L={cur_len}] step={step:4d} loss={loss_val:.4f} "
+                f"val_acc_256={val_acc:.4f} best_256={best_val_acc:.4f} "
+                f"elapsed={time.perf_counter()-start_time:.1f}s",
                 flush=True,
             )
-            if val_acc >= early_stop_acc and step >= 100:
+            if cur_len == train_length and val_acc >= early_stop_acc and step >= 100:
                 break
-
 
     elapsed_s = time.perf_counter() - start_time
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -204,7 +228,7 @@ def train_single_run(
             "param_count": count_trainable_params(model),
             "seed": seed,
             "lr": lr,
-            "batch_size": batch_size,
+            "batch_size": eff_batch,
             "elapsed_seconds": elapsed_s,
         },
         ckpt_path,
@@ -222,6 +246,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train MambaLM and CausalTransformerLM baselines.")
     parser.add_argument("--device", default=os.environ.get("TRAIN_DEVICE", "cpu"))
     parser.add_argument("--max-steps", type=int, default=int(os.environ.get("MAX_STEPS", "2000")))
+    parser.add_argument("--tasks", nargs="+", default=["selective_copy", "induction"])
+    parser.add_argument("--models", nargs="+", default=["mamba", "transformer"])
     parser.add_argument("--checkpoint-dir", default=os.environ.get("CHECKPOINT_DIR", "checkpoints"))
     parser.add_argument("--output-dir", default=os.environ.get("OUTPUT_DIR", "reports"))
     args = parser.parse_args()
@@ -234,7 +260,7 @@ def main() -> None:
     print("Scan equivalence:", json.dumps(scan_report))
 
     summary: dict[str, object] = {}
-    for task in ("selective_copy", "induction"):
+    for task in args.tasks:
         torch.manual_seed(20261114)
         mamba, transformer, mamba_params, tf_params, mlp_width = build_models_for_task(task, device)
         rel_diff = abs(tf_params - mamba_params) / mamba_params
@@ -242,30 +268,31 @@ def main() -> None:
             f"Task={task}: Mamba params={mamba_params}, Transformer params={tf_params} "
             f"(mlp_width={mlp_width}, rel_diff={rel_diff:.4%})"
         )
-        mamba_res = train_single_run(
-            model_name="mamba",
-            model=mamba,
-            task=task,
-            device=device,
-            checkpoint_dir=ckpt_dir,
-            max_steps=args.max_steps,
-        )
-        tf_res = train_single_run(
-            model_name="transformer",
-            model=transformer,
-            task=task,
-            device=device,
-            checkpoint_dir=ckpt_dir,
-            max_steps=args.max_steps,
-            mlp_width=mlp_width,
-        )
-        summary[task] = {
+        task_summary: dict[str, object] = {
             "mamba_params": mamba_params,
             "transformer_params": tf_params,
             "transformer_mlp_width": mlp_width,
-            "mamba": mamba_res,
-            "transformer": tf_res,
         }
+        if "mamba" in args.models:
+            task_summary["mamba"] = train_single_run(
+                model_name="mamba",
+                model=mamba,
+                task=task,
+                device=device,
+                checkpoint_dir=ckpt_dir,
+                max_steps=args.max_steps,
+            )
+        if "transformer" in args.models:
+            task_summary["transformer"] = train_single_run(
+                model_name="transformer",
+                model=transformer,
+                task=task,
+                device=device,
+                checkpoint_dir=ckpt_dir,
+                max_steps=args.max_steps,
+                mlp_width=mlp_width,
+            )
+        summary[task] = task_summary
 
     print("Training complete:", json.dumps(summary, indent=2))
 
