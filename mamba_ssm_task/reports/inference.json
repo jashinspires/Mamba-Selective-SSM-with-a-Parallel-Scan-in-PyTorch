@@ -1,0 +1,30 @@
+{
+  "lengths": [
+    256,
+    1024,
+    4096
+  ],
+  "device": "cpu",
+  "mamba_state_bytes": [
+    19456,
+    19456,
+    19456
+  ],
+  "transformer_kv_bytes": [
+    262144,
+    1048576,
+    4194304
+  ],
+  "mamba_latency_ms": [
+    0.9141,
+    0.9046,
+    0.9204
+  ],
+  "transformer_latency_ms": [
+    0.9981,
+    1.1984,
+    2.7506
+  ],
+  "mamba_state_byte_ratio": 1.0,
+  "transformer_4096_over_256_ratio": 16.0
+}

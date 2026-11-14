@@ -63,7 +63,7 @@ export const ScanLabSection: React.FC = () => {
       ? sim.rounds[selectedNode.round - 1][selectedNode.t]
       : null;
 
-  const svgWidth = Math.max(560, inputs.length * 92 + 64);
+  const svgWidth = Math.max(280, inputs.length * 92 + 64);
   const rowHeight = 68;
   const svgHeight = sim.rounds.length * rowHeight + 44;
 
@@ -172,11 +172,11 @@ export const ScanLabSection: React.FC = () => {
                   {inputs.length} steps
                 </span>
               </div>
-              <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
+              <div className="max-h-60 divide-y divide-slate-100 overflow-y-auto pr-1">
                 {inputs.map((step, idx) => (
                   <div
                     key={step.t}
-                    className="grid grid-cols-[36px_1fr_1fr] items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2.5 py-1.5"
+                    className="grid grid-cols-[36px_1fr_1fr] items-center gap-2 py-2"
                   >
                     <span className="font-mono text-xs font-semibold text-slate-600">
                       t={step.t}
