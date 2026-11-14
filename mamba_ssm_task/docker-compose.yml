@@ -1,0 +1,10 @@
+services:
+  mamba-ssm:
+    build: .
+    working_dir: /workspace
+    env_file:
+      - .env.example
+    volumes:
+      - ./checkpoints:/workspace/checkpoints
+      - ./reports:/workspace/reports
+    command: ["pytest", "-q"]

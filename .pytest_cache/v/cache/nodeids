@@ -1,0 +1,17 @@
+[
+  "mamba_ssm_task/tests/test_block.py::test_block_causality",
+  "mamba_ssm_task/tests/test_block.py::test_block_defaults_and_shapes",
+  "mamba_ssm_task/tests/test_block.py::test_block_step_matches_forward",
+  "mamba_ssm_task/tests/test_block.py::test_zeroing_gate_zeros_output",
+  "mamba_ssm_task/tests/test_discretize.py::test_contractive_a_bar_and_positive_delta",
+  "mamba_ssm_task/tests/test_discretize.py::test_one_state_discretize",
+  "mamba_ssm_task/tests/test_discretize.py::test_small_delta_limit",
+  "mamba_ssm_task/tests/test_scan.py::test_compose_associative",
+  "mamba_ssm_task/tests/test_scan.py::test_four_step",
+  "mamba_ssm_task/tests/test_scan.py::test_no_official_import",
+  "mamba_ssm_task/tests/test_scan.py::test_scan_equivalence_and_report",
+  "mamba_ssm_task/tests/test_scan.py::test_sequential_one_state",
+  "mamba_ssm_task/tests/test_tasks.py::test_induction_generator",
+  "mamba_ssm_task/tests/test_tasks.py::test_loss_mask",
+  "mamba_ssm_task/tests/test_tasks.py::test_selective_copy_generator"
+]
