@@ -169,40 +169,50 @@ export const TasksEvalSection: React.FC<TasksEvalSectionProps> = ({ trainEval, o
                       <path d={toPath(mambaPts)} fill="none" stroke="#2563EB" strokeWidth={2.5} />
                       <path d={toPath(tfPts)} fill="none" stroke="#D97706" strokeWidth={2.5} strokeDasharray="6 3" />
 
-                      {mambaPts.map((p) => (
-                        <g key={`m-${p.len}`}>
-                          <circle cx={p.x} cy={p.y} r={5} fill="#2563EB" stroke="#FFFFFF" strokeWidth={1.5} />
-                          <text
-                            x={p.x}
-                            y={Math.max(18, p.y - 10)}
-                            textAnchor="middle"
-                            className="fill-blue-700 font-mono text-[11px] font-semibold"
-                          >
-                            {(p.acc * 100).toFixed(1)}%
-                          </text>
-                        </g>
-                      ))}
-                      {tfPts.map((p) => (
-                        <g key={`t-${p.len}`}>
-                          <rect
-                            x={p.x - 4.5}
-                            y={p.y - 4.5}
-                            width={9}
-                            height={9}
-                            fill="#D97706"
-                            stroke="#FFFFFF"
-                            strokeWidth={1.5}
-                          />
-                          <text
-                            x={p.x}
-                            y={Math.min(212, p.y + 18)}
-                            textAnchor="middle"
-                            className="fill-amber-700 font-mono text-[11px] font-semibold"
-                          >
-                            {(p.acc * 100).toFixed(1)}%
-                          </text>
-                        </g>
-                      ))}
+                      {mambaPts.map((p, idx) => {
+                        const tfY = tfPts[idx].y;
+                        const isMambaHigher = p.y <= tfY;
+                        const labelY = isMambaHigher ? Math.max(18, p.y - 10) : Math.min(212, p.y + 16);
+                        return (
+                          <g key={`m-${p.len}`}>
+                            <circle cx={p.x} cy={p.y} r={5} fill="#2563EB" stroke="#FFFFFF" strokeWidth={1.5} />
+                            <text
+                              x={p.x}
+                              y={labelY}
+                              textAnchor="middle"
+                              className="fill-blue-700 font-mono text-[11px] font-semibold"
+                            >
+                              {(p.acc * 100).toFixed(1)}%
+                            </text>
+                          </g>
+                        );
+                      })}
+                      {tfPts.map((p, idx) => {
+                        const mY = mambaPts[idx].y;
+                        const isTfHigher = p.y < mY;
+                        const labelY = isTfHigher ? Math.max(18, p.y - 10) : Math.min(212, p.y + 18);
+                        return (
+                          <g key={`t-${p.len}`}>
+                            <rect
+                              x={p.x - 4.5}
+                              y={p.y - 4.5}
+                              width={9}
+                              height={9}
+                              fill="#D97706"
+                              stroke="#FFFFFF"
+                              strokeWidth={1.5}
+                            />
+                            <text
+                              x={p.x}
+                              y={labelY}
+                              textAnchor="middle"
+                              className="fill-amber-700 font-mono text-[11px] font-semibold"
+                            >
+                              {(p.acc * 100).toFixed(1)}%
+                            </text>
+                          </g>
+                        );
+                      })}
 
                       {xs.map((x, idx) => (
                         <text
@@ -325,21 +335,20 @@ export const TasksEvalSection: React.FC<TasksEvalSectionProps> = ({ trainEval, o
                 </table>
               </div>
 
-              <div className="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                {activeTask === 'selective_copy' ? (
-                  <span>
-                    <strong className="text-emerald-700">● FLOOR MET:</strong> MambaLM passes L=256 (
-                    {((currentTaskReport.models.mamba.lengths['256']?.token_accuracy ?? 0) * 100).toFixed(1)}% &ge; 80.0%)
-                    on 64+ fresh sequences.
-                  </span>
-                ) : (
-                  <span>
-                    <strong className="text-emerald-700">● FLOOR MET:</strong> MambaLM passes L=256 (
-                    {((currentTaskReport.models.mamba.lengths['256']?.token_accuracy ?? 0) * 100).toFixed(1)}% &ge; 50.0%)
-                    on 64+ fresh sequences.
-                  </span>
-                )}
-              </div>
+              {(() => {
+                const mamba256 = currentTaskReport.models.mamba.lengths['256']?.token_accuracy ?? 0;
+                const floor = activeTask === 'selective_copy' ? 0.8 : 0.5;
+                const passed = mamba256 >= floor;
+                return (
+                  <div className="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                    <strong className={passed ? 'text-emerald-700' : 'text-rose-700'}>
+                      {passed ? '● FLOOR MET:' : '▲ BELOW FLOOR:'}
+                    </strong>{' '}
+                    MambaLM {passed ? 'passes' : 'scored below'} L=256 ({(mamba256 * 100).toFixed(1)}%{' '}
+                    {passed ? '≥' : '<'} {(floor * 100).toFixed(1)}%) on 64 fresh sequences.
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             <div className="space-y-4">

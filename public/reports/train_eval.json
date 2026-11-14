@@ -1,0 +1,110 @@
+{
+  "train_length": 256,
+  "eval_lengths": [
+    256,
+    1024,
+    4096
+  ],
+  "tasks": {
+    "selective_copy": {
+      "mamba_param_count": 98432,
+      "transformer_param_count": 98272,
+      "transformer_mlp_width": 240,
+      "param_relative_diff": 0.001625487646293888,
+      "mamba_step_count": 4000,
+      "transformer_step_count": 1300,
+      "models": {
+        "mamba": {
+          "step_count": 4000,
+          "lengths": {
+            "256": {
+              "token_accuracy": 0.875977,
+              "num_sequences": 64,
+              "eval_seed": 777256
+            },
+            "1024": {
+              "token_accuracy": 0.199219,
+              "num_sequences": 32,
+              "eval_seed": 778024
+            },
+            "4096": {
+              "token_accuracy": 0.056641,
+              "num_sequences": 32,
+              "eval_seed": 781096
+            }
+          }
+        },
+        "transformer": {
+          "step_count": 1300,
+          "lengths": {
+            "256": {
+              "token_accuracy": 0.907227,
+              "num_sequences": 64,
+              "eval_seed": 777256
+            },
+            "1024": {
+              "token_accuracy": 0.080078,
+              "num_sequences": 32,
+              "eval_seed": 778024
+            },
+            "4096": {
+              "token_accuracy": 0.064453,
+              "num_sequences": 32,
+              "eval_seed": 781096
+            }
+          }
+        }
+      }
+    },
+    "induction": {
+      "mamba_param_count": 98176,
+      "transformer_param_count": 98016,
+      "transformer_mlp_width": 240,
+      "param_relative_diff": 0.0016297262059973925,
+      "mamba_step_count": 3225,
+      "transformer_step_count": 3250,
+      "models": {
+        "mamba": {
+          "step_count": 3225,
+          "lengths": {
+            "256": {
+              "token_accuracy": 1.0,
+              "num_sequences": 64,
+              "eval_seed": 787256
+            },
+            "1024": {
+              "token_accuracy": 0.40625,
+              "num_sequences": 32,
+              "eval_seed": 788024
+            },
+            "4096": {
+              "token_accuracy": 0.03125,
+              "num_sequences": 32,
+              "eval_seed": 791096
+            }
+          }
+        },
+        "transformer": {
+          "step_count": 3250,
+          "lengths": {
+            "256": {
+              "token_accuracy": 0.890625,
+              "num_sequences": 64,
+              "eval_seed": 787256
+            },
+            "1024": {
+              "token_accuracy": 0.28125,
+              "num_sequences": 32,
+              "eval_seed": 788024
+            },
+            "4096": {
+              "token_accuracy": 0.1875,
+              "num_sequences": 32,
+              "eval_seed": 791096
+            }
+          }
+        }
+      }
+    }
+  }
+}

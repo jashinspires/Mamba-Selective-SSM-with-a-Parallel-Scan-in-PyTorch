@@ -3,6 +3,8 @@
   "mamba_ssm_task/tests/test_block.py::test_block_defaults_and_shapes",
   "mamba_ssm_task/tests/test_block.py::test_block_step_matches_forward",
   "mamba_ssm_task/tests/test_block.py::test_zeroing_gate_zeros_output",
+  "mamba_ssm_task/tests/test_checkpoints.py::test_checkpoints_and_length_eval",
+  "mamba_ssm_task/tests/test_checkpoints.py::test_param_counts",
   "mamba_ssm_task/tests/test_discretize.py::test_contractive_a_bar_and_positive_delta",
   "mamba_ssm_task/tests/test_discretize.py::test_one_state_discretize",
   "mamba_ssm_task/tests/test_discretize.py::test_small_delta_limit",

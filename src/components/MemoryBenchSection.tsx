@@ -131,9 +131,9 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
               </h3>
               <span className="font-mono text-xs text-slate-500">KiB (fp32)</span>
             </div>
-            <svg viewBox="0 0 540 240" className="w-full" role="img" aria-label="Memory bytes vs sequence length">
+            <svg viewBox="0 0 540 248" className="w-full" role="img" aria-label="Memory bytes vs sequence length">
               {[0, 0.25, 0.5, 0.75, 1.0].map((frac) => {
-                const y = 198 - frac * 165;
+                const y = 194 - frac * 162;
                 const val = (frac * maxKib).toFixed(0);
                 return (
                   <g key={frac}>
@@ -149,13 +149,13 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
                 const xs = [125, 300, 475];
                 const mPts = lengths.map((l, i) => ({
                   x: xs[i],
-                  y: 198 - (mambaBytes[i] / 1024 / maxKib) * 165,
+                  y: 194 - (mambaBytes[i] / 1024 / maxKib) * 162,
                   kib: mambaBytes[i] / 1024,
                   l,
                 }));
                 const tPts = lengths.map((l, i) => ({
                   x: xs[i],
-                  y: 198 - (tfBytes[i] / 1024 / maxKib) * 165,
+                  y: 194 - (tfBytes[i] / 1024 / maxKib) * 162,
                   kib: tfBytes[i] / 1024,
                   l,
                 }));
@@ -169,7 +169,7 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
                     {mPts.map((p) => (
                       <g key={`mb-${p.l}`}>
                         <circle cx={p.x} cy={p.y} r={4.5} fill="#2563EB" stroke="#FFF" strokeWidth={1.5} />
-                        <text x={p.x} y={p.y - 9} textAnchor="middle" className="fill-blue-700 font-mono text-[10px] font-semibold">
+                        <text x={p.x} y={p.y + 15} textAnchor="middle" className="fill-blue-700 font-mono text-[10px] font-semibold">
                           {p.kib.toFixed(1)} KiB
                         </text>
                       </g>
@@ -177,13 +177,13 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
                     {tPts.map((p) => (
                       <g key={`tb-${p.l}`}>
                         <rect x={p.x - 4} y={p.y - 4} width={8} height={8} fill="#D97706" stroke="#FFF" strokeWidth={1.5} />
-                        <text x={p.x - 6} y={Math.max(16, p.y - 10)} textAnchor="middle" className="fill-amber-700 font-mono text-[10px] font-semibold">
+                        <text x={p.x} y={Math.max(16, p.y - 10)} textAnchor="middle" className="fill-amber-700 font-mono text-[10px] font-semibold">
                           {p.kib.toFixed(0)} KiB
                         </text>
                       </g>
                     ))}
                     {xs.map((x, idx) => (
-                      <text key={lengths[idx]} x={x} y={222} textAnchor="middle" className="fill-slate-600 font-mono text-xs">
+                      <text key={lengths[idx]} x={x} y={232} textAnchor="middle" className="fill-slate-600 font-mono text-xs">
                         L={lengths[idx]}
                       </text>
                     ))}
@@ -201,9 +201,9 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
               </h3>
               <span className="font-mono text-xs text-slate-500">ms / token</span>
             </div>
-            <svg viewBox="0 0 540 240" className="w-full" role="img" aria-label="Per-token latency vs sequence length">
+            <svg viewBox="0 0 540 248" className="w-full" role="img" aria-label="Per-token latency vs sequence length">
               {[0, 0.25, 0.5, 0.75, 1.0].map((frac) => {
-                const y = 198 - frac * 165;
+                const y = 194 - frac * 162;
                 const val = (frac * maxMs).toFixed(2);
                 return (
                   <g key={frac}>
@@ -219,13 +219,13 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
                 const xs = [125, 300, 475];
                 const mPts = lengths.map((l, i) => ({
                   x: xs[i],
-                  y: 198 - (mambaMs[i] / maxMs) * 165,
+                  y: 194 - (mambaMs[i] / maxMs) * 162,
                   ms: mambaMs[i],
                   l,
                 }));
                 const tPts = lengths.map((l, i) => ({
                   x: xs[i],
-                  y: 198 - (tfMs[i] / maxMs) * 165,
+                  y: 194 - (tfMs[i] / maxMs) * 162,
                   ms: tfMs[i],
                   l,
                 }));
@@ -236,24 +236,32 @@ export const MemoryBenchSection: React.FC<MemoryBenchSectionProps> = ({ inferenc
                   <g>
                     <path d={path(mPts)} fill="none" stroke="#2563EB" strokeWidth={2.5} />
                     <path d={path(tPts)} fill="none" stroke="#D97706" strokeWidth={2.5} />
-                    {mPts.map((p) => (
-                      <g key={`ml-${p.l}`}>
-                        <circle cx={p.x} cy={p.y} r={4.5} fill="#2563EB" stroke="#FFF" strokeWidth={1.5} />
-                        <text x={p.x} y={Math.max(16, p.y - 9)} textAnchor="middle" className="fill-blue-700 font-mono text-[10px] font-semibold">
-                          {p.ms.toFixed(3)} ms
-                        </text>
-                      </g>
-                    ))}
-                    {tPts.map((p) => (
-                      <g key={`tl-${p.l}`}>
-                        <rect x={p.x - 4} y={p.y - 4} width={8} height={8} fill="#D97706" stroke="#FFF" strokeWidth={1.5} />
-                        <text x={p.x} y={Math.min(212, p.y + 16)} textAnchor="middle" className="fill-amber-700 font-mono text-[10px] font-semibold">
-                          {p.ms.toFixed(3)} ms
-                        </text>
-                      </g>
-                    ))}
+                    {mPts.map((p, idx) => {
+                      const isHigher = p.y <= tPts[idx].y;
+                      const labelY = isHigher ? Math.max(16, p.y - 9) : Math.min(212, p.y + 16);
+                      return (
+                        <g key={`ml-${p.l}`}>
+                          <circle cx={p.x} cy={p.y} r={4.5} fill="#2563EB" stroke="#FFF" strokeWidth={1.5} />
+                          <text x={p.x} y={labelY} textAnchor="middle" className="fill-blue-700 font-mono text-[10px] font-semibold">
+                            {p.ms.toFixed(3)} ms
+                          </text>
+                        </g>
+                      );
+                    })}
+                    {tPts.map((p, idx) => {
+                      const isHigher = p.y < mPts[idx].y;
+                      const labelY = isHigher ? Math.max(16, p.y - 9) : Math.min(212, p.y + 16);
+                      return (
+                        <g key={`tl-${p.l}`}>
+                          <rect x={p.x - 4} y={p.y - 4} width={8} height={8} fill="#D97706" stroke="#FFF" strokeWidth={1.5} />
+                          <text x={p.x} y={labelY} textAnchor="middle" className="fill-amber-700 font-mono text-[10px] font-semibold">
+                            {p.ms.toFixed(3)} ms
+                          </text>
+                        </g>
+                      );
+                    })}
                     {xs.map((x, idx) => (
-                      <text key={lengths[idx]} x={x} y={222} textAnchor="middle" className="fill-slate-600 font-mono text-xs">
+                      <text key={lengths[idx]} x={x} y={232} textAnchor="middle" className="fill-slate-600 font-mono text-xs">
                         L={lengths[idx]}
                       </text>
                     ))}

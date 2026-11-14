@@ -2,5 +2,7 @@
   "name": "Mamba Selective SSM Workbench",
   "description": "Interactive ZOH discretization, parallel associative scan visualizer, and length-generalization benchmark for Mamba Selective State-Space Models vs. Causal Transformers.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

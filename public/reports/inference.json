@@ -4,7 +4,7 @@
     1024,
     4096
   ],
-  "device": "cpu",
+  "device": "cuda",
   "mamba_state_bytes": [
     19456,
     19456,
@@ -16,14 +16,14 @@
     4194304
   ],
   "mamba_latency_ms": [
-    0.9141,
-    0.9046,
-    0.9204
+    1.2731,
+    1.2367,
+    1.4355
   ],
   "transformer_latency_ms": [
-    0.9981,
-    1.1984,
-    2.7506
+    1.1345,
+    1.1688,
+    1.1892
   ],
   "mamba_state_byte_ratio": 1.0,
   "transformer_4096_over_256_ratio": 16.0
